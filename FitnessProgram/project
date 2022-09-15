@@ -1,0 +1,325 @@
+#################################
+#Shabang
+#################################
+#!/bin/bash
+
+#####################################################################################################
+#Basic information -- File created
+#####################################################################################################
+
+#Client name intake
+echo "Welcome! What is your name?"
+echo "First name: "
+read fname
+echo "Last name: "
+read lname
+echo
+echo "Nice to meeting you, $fname $lname!" #print on screen
+
+#create clinet file with client name
+touch ./Client_file/"$fname"_"$lname".txt
+#greeting in txt file
+echo "Hi, $fname $lname!"  > ./Client_file/"$fname"_"$lname".txt  #save to txt file 
+echo "This is your customized information sheet." >> ./Client_file/"$fname"_"$lname".txt
+echo  >>./Client_file/"$fname"_"$lname".txt
+
+#gender
+echo "Please enter your gender[M/F]: ?"
+read gender
+
+#check input
+while [ "$gender" != "M" ] && [ "$gender" != "F" ]
+do
+	echo "Re-enter ('M' for Male, 'F' for Female): "
+	read gender
+done
+
+##########################Print in file#################################
+echo "BASIC INFORMATION" >> ./Client_file/"$fname"_"$lname".txt
+echo "-------------------" >> ./Client_file/"$fname"_"$lname".txt
+echo "Gender: $gender" >> ./Client_file/"$fname"_"$lname".txt
+
+#######################################################################################################
+#Age
+#######################################################################################################
+#promt user input
+echo -n "Enter the birthdate (mm-dd-yyyy): "
+read bdate
+
+bmonth=${bdate:0:2}
+bday=${bdate:3:2}
+byear=${bdate:6:4}
+
+cdate=`date +%m-%d-%Y`
+
+cmonth=${cdate:0:2}
+cday=${cdate:3:2}
+cyear=${cdate:6:4}
+
+if [ "$cmonth" -lt "$bmonth" ] || [ "$cmonth" -eq "$bmonth" ] && [ "$cday" -lt "$bday" ]
+then
+  let age=cyear-byear-1
+else
+  let age=cyear-byear
+fi
+
+##########################Print in file#################################
+echo "Age = $age" >> ./Client_file/"$fname"_"$lname".txt
+
+
+#####################################################################################################
+#Height
+#####################################################################################################
+#Client height intake
+echo
+echo "You are in Height Section now!"
+height=0.00
+echo -n "Please enter unit choice(1 -> cm, 2 -> feet): "
+read choiceH
+
+#check choice validation
+#check if number in range
+while [ $choiceH -ge 3 ] 
+do
+	echo "Out of range. Enter again(1 -> cm, 2 -> feet): "
+	read choiceH
+done
+
+#user input for height in selected unit
+if [ $choiceH -eq 1 ]; then
+	echo -n "Enter your height in cm: "
+	read heightC
+	#echo "Your height is $heightC cm."
+else
+	echo -n "Enter your height in feet: "
+	read heightF
+	#echo "Your height is $heightF feet."
+fi
+
+
+#unit convertion: both data in cm and inches needed for futhur calculation
+c0=12
+c=0.393701
+c1=30.48
+if [ $choiceH -eq 1 ]; then
+	heightI=$(echo "scale=2;$heightC*$c" | bc)
+else
+	heightI=$(echo "scale=2;$heightF*$c0" | bc)
+	heightC=$(echo "scale=2;$heightF*$c1" | bc)
+fi
+#echo "Heigh: $heightC cm / $heightI inches / $heightF feet"
+
+
+#height information output
+echo "Height entered is $heightC cm. " #on screen
+#############################Print in file#################################
+echo "Height: $heightC cm ($heightF feet)" >> ./Client_file/"$fname"_"$lname".txt #in file
+
+######################################################################################################
+#Weight
+######################################################################################################
+#Client weight intake
+weight=0.00
+echo #empty line
+echo "You are going to Weight Section!"
+echo -n "What is your input unit(1 for lb, 2 for kg)? "
+#Read integer form input
+read choiceW
+
+#check if number in range
+while [ $choiceW -ge 3 ] 
+do
+	echo "Out of range. Enter again(1 for lb, 2 for kg): "
+	read choiceW
+done
+
+#user input in selected unit
+if [ $choiceW -eq 1 ]; then
+	echo -n "Enter your weight in lb: "
+	read weightL
+	#echo "Your entered $weightL lb."
+else
+	echo -n "Enter your weight in kg: "
+	read weightK
+	#echo "Your entered $weightK kg."
+fi 
+
+
+#unit convert from lb to kg and kg to lb
+c2=2.2046
+if [ $choiceW -eq 1 ]; then
+	weightK=$(echo "scale=2;$weightL/$c2" | bc)
+	#echo "Weight is $weightK kg."
+else
+	weightL=$(echo "scale=2;$weightK*$c2" | bc)
+	#echo "Weight is $weightL lb."
+fi
+
+
+#print weight in kg
+echo "Weight: $weightK kg ($weightL lbs)" >> ./Client_file/"$fname"_"$lname".txt #in file
+echo "Your weight in Kilogram is $weightK kg." #on screen
+
+#calculate BMI and display to client
+c3=10000
+BMI=$(echo "scale=2; $weightK*$c3/$heightC/$heightC" | bc)
+echo #empty line
+echo "Your BMI is $BMI." #on screen
+
+echo "BMI: $BMI" >> ./Client_file/"$fname"_"$lname".txt #in file
+
+####################################################################################################################
+#Carlories 
+###################################################################################################################
+##############################
+#BMR 
+##############################
+#info for BMR
+echo
+echo "Carlories Section!" 
+echo "BMR Information: "
+echo "The Basal Metabolic Rate (BMR) is the amount of energy (calories) your body needs while resting." #on screen
+
+#Determine constant regarding to gender
+if [ "$gender" == "F" ]; then	
+	x1=655
+	x2=4.3
+	x3=4.7
+	x4=4.7
+	#echo  "$x1 $x2 $x3 $x4"
+
+else
+	x1=66
+	x2=6.3
+	x3=12.9
+	x4=6.8
+	#echo "$x1 $x2 $x3 $x4"
+fi 
+
+#BMR calculation
+BMR=$(echo "scale=2; $x1+$x2*$weightL+$x3*$heightI-$x4*$age" | bc)
+echo "Your BMR is $BMR"
+
+###############################################Print in file###################################################
+echo >>./Client_file/"$fname"_"$lname".txt 
+echo "CARLORIES SECTION" >>./Client_file/"$fname"_"$lname".txt 
+echo "-------------------" >> ./Client_file/"$fname"_"$lname".txt
+echo >>./Client_file/"$fname"_"$lname".txt 
+echo "BMR Information: " >>./Client_file/"$fname"_"$lname".txt 
+echo "The Basal Metabolic Rate (BMR) is the amount of energy (calories) your body needs while resting." >>./Client_file/"$fname"_"$lname".txt 
+echo >>./Client_file/"$fname"_"$lname".txt 
+echo "Your BMR: $BMR" >>./Client_file/"$fname"_"$lname".txt 
+
+#############################
+#Exercise Level
+############################
+#selection sheet
+echo 
+cat active
+
+
+#user input
+echo -n "Please select: "
+read level
+
+#check entry range
+while [ $level -ge 6 ] 
+do
+	echo "Please reselect: "
+	read level
+done
+
+#Calculate daily calories need
+if [ $level -eq 1 ]; then
+	p=1.2
+elif [ $level -eq 2 ]; then
+	p=1.375
+elif [ $level -eq 3 ]; then
+	p=1.55
+elif [ $level -eq 4 ]; then
+	p=1.725
+else
+	p=1.9
+fi 
+
+cal=$(echo "scale=2; $BMR*$p" | bc)
+echo "Your daily calories need is $cal calories."
+#############################Print in file##############################################
+#######################Print in file###########################
+cat active >> ./Client_file/"$fname"_"$lname".txt 
+echo >> ./Client_file/"$fname"_"$lname".txt 
+echo "Your choice is: $level" >> ./Client_file/"$fname"_"$lname".txt 
+echo >> ./Client_file/"$fname"_"$lname".txt 
+echo "Your daily calories need based on active level is $cal calories." >>./Client_file/"$fname"_"$lname".txt
+
+
+#####################################################################################################
+#GOAL AND ADVICES
+#####################################################################################################
+#section header
+echo
+echo "GOALS AND ADVICE"
+#############################Print in file#####################################
+echo >> ./Client_file/"$fname"_"$lname".txt #in file
+echo "GOALS AND ADVICE" >> ./Client_file/"$fname"_"$lname".txt #in file
+echo "-------------------" >> ./Client_file/"$fname"_"$lname".txt
+
+#promot user to select goal
+echo "Do you want to 1. Maintain Weight 2. Lose Weight or 3. Gain Mass:"
+read choice
+
+#check if choice in range
+while [ $choice -ge 4 ] 
+do
+	echo "Enter again: "
+	read choice
+done
+
+
+#confirm users' choice and add to client file
+if [ $choice -eq 1 ]; then
+	echo "Your want to maintain your current weight!"
+	echo
+	echo "TIPS: "
+	echo
+	cat SampleMaintain.txt
+	#############################Print in file################################################
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo "Your want to maintain your current weight!" >> ./Client_file/"$fname"_"$lname".txt 
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo "TIPS: " >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	cat SampleMaintain.txt >> ./Client_file/"$fname"_"$lname".txt #in file
+	
+elif  [ $choice -eq 2 ]; then
+	echo "Your want to lose weight!"
+	echo
+	echo "Advice: "
+	cat SampleLoss.txt
+	#############################Print in file###############################
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo "Your want to lose weight!" >> ./Client_file/"$fname"_"$lname".txt 
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo "ADVICE: " >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	cat SampleLoss.txt >> ./Client_file/"$fname"_"$lname".txt #in file
+	
+else    echo "Your want to gain muscle!" 
+	echo
+	echo "Sample Exercises: "
+	cat SampleMass.txt
+	##############################Print in file###############################
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo "Your want to gain muscle!" >> ./Client_file/"$fname"_"$lname".txt 
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo "SAMPLE EXERCISES: " >> ./Client_file/"$fname"_"$lname".txt #in file
+	echo >> ./Client_file/"$fname"_"$lname".txt #in file
+	cat SampleMass.txt >> ./Client_file/"$fname"_"$lname".txt #in file
+fi
+
+###############################################################################
+#Reference
+###############################################################################
+echo >> ./Client_file/"$fname"_"$lname".txt 
+echo >> ./Client_file/"$fname"_"$lname".txt 
+cat Reference.txt >> ./Client_file/"$fname"_"$lname".txt 
